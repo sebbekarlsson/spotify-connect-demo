@@ -108,14 +108,15 @@ def get_new_releases(country, offset, limit, code):
 
             name = album['name']
             release_date = album['release_date']
+            popularity = album['popularity']
 
             writer = csv.writer(
                 csvfile,
                 delimiter=';',
             )
 
-            writer.writerow([name, release_date])
+            writer.writerow([name, release_date, popularity])
 
-            insert_album(name, release_date)
+            insert_album(name, release_date, popularity)
 
     return found_albums

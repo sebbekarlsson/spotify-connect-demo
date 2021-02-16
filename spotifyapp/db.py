@@ -34,6 +34,7 @@ class Album(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(300))
     release_date = Column(Date)
+    popularity = Column(Integer)
 
 
 # en funktion som skapar "albums" tabellen om den inte redan finns
@@ -44,14 +45,15 @@ def create_tables():
         Table('albums', metadata,
               Column('id', Integer, primary_key=True, nullable=False),
               Column('name', String(300)),
-              Column('release_date', Date))
+              Column('release_date', Date),
+              Column('popularity', Integer))
 
         metadata.create_all()
 
 
 # en funktion som sparar ett album i databasen
-def insert_album(name, release_date):
-    album = Album(name=name, release_date=release_date)
+def insert_album(name, release_date, popularity):
+    album = Album(name=name, release_date=release_date, popularity=popularity)
     session.add(album)
     session.commit()
     return album
