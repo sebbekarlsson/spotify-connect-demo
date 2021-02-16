@@ -3,11 +3,17 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from spotifyapp.config import config
 
+
+mysql_user = config.get('mysql_user')
+mysql_password = config.get('mysql_password')
+mysql_host = config.get('mysql_host')
+mysql_dbname = config.get('mysql_dbname')
 
 # ansluta till databasen
 engine = create_engine(
-    'mysql+pymysql://guest:abc123@localhost/spotify',
+    f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_dbname}',
     echo=True
 )
 

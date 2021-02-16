@@ -1,4 +1,8 @@
 {
   "client_id": "",
-  "client_secret": ""
+  "client_secret": "",
+  "mysql_user": "",
+  "mysql_password": "",
+  "mysql_dbname": "",
+  "mysql_host": ""
 }

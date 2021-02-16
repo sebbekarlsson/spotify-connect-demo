@@ -17,6 +17,7 @@ BASE_BROWSE_URL = 'https://api.spotify.com/v1/browse/'
 BASE_NEW_RELASES_URL = BASE_BROWSE_URL + 'new-releases'
 
 BASE_TOKEN_URL = 'https://accounts.spotify.com/api/token'
+ALBUM_BASE_URL = 'https://api.spotify.com/v1/albums/'
 
 
 def get_spotify_auth_url():
@@ -53,15 +54,58 @@ def get_new_releases(country, offset, limit, code):
     uri = BASE_NEW_RELASES_URL + '?' + params
     print(uri)
 
-    headers = {'Authorization': 'Bearer ' + token}  # har skickar vi med token
+    # har skickar vi med token
+    headers = {'Authorization': 'Bearer ' + token}
 
     response = requests.get(uri, headers=headers)
 
     data = response.json()
     albums = data['albums']['items']
 
+    found_albums = []
+
     with open('albums.csv', 'w', newline='') as csvfile:
+        # loopar igenom alla album fran new-releases APIet
         for album in albums:
+            album_id = album.get('id')
+
+            if album_id:
+                # plocka ut mer info om albumet genom att anropa
+                # album APIet och skicka med albumet i loopens ID.
+                response = requests.get(
+                    ALBUM_BASE_URL + album_id, headers=headers)
+                album_data = response.json()
+
+                # sakerhetsatgerd ifall album_data ar tom
+                # da hoppar vi vidare i loopen och ignorerar resten
+                if not album_data:
+                    continue
+
+                album = album_data
+                album['actual_artists'] = []
+                found_albums.append(album)
+
+                artists = album.get('artists', [])
+
+                # loopa igen om alla artist i albumet
+                for artist in artists:
+                    artist_id = artist.get('id')
+
+                    # sakerhetsatgerd, finns inte artist_id
+                    # sa struntar vi i den artisten.
+                    if not artist_id:
+                        continue
+
+                    # hamta mer info om artisten
+                    response = requests.get(
+                        'https://api.spotify.com/v1/artists/' + artist_id,
+                        headers=headers)
+
+                    data = response.json()
+
+                    # stoppa in info om artisten i album objektet
+                    album['actual_artists'].append(data)
+
             name = album['name']
             release_date = album['release_date']
 
@@ -74,4 +118,4 @@ def get_new_releases(country, offset, limit, code):
 
             insert_album(name, release_date)
 
-    return data
+    return found_albums
